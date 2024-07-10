@@ -153,7 +153,10 @@ class Screen
     {
         if ($this->isUtf8 === null) {
             // null should equal 0 here, however seems to equal '' on some systems:
-            $current = setlocale(LC_ALL, 0);
+            $current = setlocale(LC_ALL, '0');
+            if ($current === false) {
+                return false;
+            }
 
             $parts = explode(';', $current);
             $lc_parts = [];

@@ -3,6 +3,9 @@
 namespace IMEdge\CliScreen;
 
 use InvalidArgumentException;
+use RuntimeException;
+
+use function preg_replace;
 
 /**
  * Screen implementation for screens with ANSI escape code support
@@ -46,7 +49,12 @@ class AnsiScreen extends Screen
      */
     public function stripAnsiCodes(string $string): string
     {
-        return \preg_replace('/\e\[?.*?[@-~]/', '', $string);
+        $result = preg_replace('/\e\[?.*?[@-~]/', '', $string);
+        if ($result === null) {
+            throw new RuntimeException('Failed to remove ANSI escape codes from ' . $string);
+        }
+
+        return $result;
     }
 
     public function clear(): string
@@ -100,7 +108,8 @@ class AnsiScreen extends Screen
     protected function startColor(?string $fgColor = null, ?string $bgColor = null): string
     {
         $parts = [];
-        if ($fgColor !== null
+        if (
+            $fgColor !== null
             && $bgColor !== null
             && ! \array_key_exists($bgColor, static::BG_COLORS)
             && \array_key_exists($bgColor, static::FG_COLORS)
